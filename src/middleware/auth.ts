@@ -1,6 +1,6 @@
-import type { Request, Response, NextFunction } from "express"
+import type { Request, Response, NextFunction } from 'express'
 import jwt from 'jsonwebtoken'
-import { User, type IUser } from "../models"
+import User, { IUser } from '../models/User'
 
 declare global {
     namespace Express {
@@ -10,32 +10,33 @@ declare global {
     }
 }
 
-export const authenticate = async ( req: Request, res: Response, next: NextFunction ) => {
+export const authenticate = async (req: Request, res: Response, next: NextFunction) => {
+    const bearer = req.headers.authorization
+
+    if(!bearer) {
+        const error = new Error('No Autorizado')
+        return res.status(401).json({error: error.message})
+    }
+
+    const [, token] = bearer.split(' ')
+
+    if(!token) {
+        const error = new Error('No Autorizado')
+        return res.status(401).json({error: error.message})
+    }
+
     try {
-        const bearer = req.headers.authorization;
-        if (!bearer) {
-            res.status(401).json({ error: "No Autorizado" });
-            return
-        }
-
-        const [, token] = bearer.split(' ')
-        if (!token) {
-            res.status(401).json({ error: 'No Autorizado' })
-            return
-        }
-
-        const result = jwt.verify(token, process.env.JWT_SECRECT)
-        if (typeof result === 'object' && result.id) {
-            const user = await User.findById(result.id).select('-password -__v')
-            if (!user) {
-                res.status(404).json({ error: 'Usuario no encontrado' })
-                return
+        const result = jwt.verify(token, process.env.JWT_SECRET)
+        if(typeof result === 'object' && result.id) {
+            const user = await User.findById(result.id).select('-password')
+            if(!user) {
+                const error = new Error('El Usuario no existe')
+                return res.status(404).json({error: error.message})
             }
             req.user = user
             next()
         }
     } catch (error) {
-        res.status(500).json({ error: 'Token no válido' })
-        next(error)
+        res.status(500).json({error: 'Token No Válido'})
     }
 }

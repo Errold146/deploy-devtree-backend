@@ -1,8 +1,8 @@
 import colors from 'colors'
-import app from "./server.ts"
+import server from './server'
 
-const port = process.env.PORT || 4000
+const port  = process.env.PORT || "4000"
 
-app.listen(port, () => {
-    console.log( colors.blue.italic('Servidor Funcionando en el Puerto: '), port)
+server.listen(port, () => {
+    console.log( colors.blue.bold( `Servidor Funcionando en el puerto: ${port} `) )
 })

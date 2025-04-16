@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from "mongoose"
+import mongoose, { Schema, Document } from 'mongoose'
 
 export interface IUser extends Document {
     handle: string
@@ -28,7 +28,7 @@ const userSchema = new Schema({
         required: true,
         trim: true,
         unique: true,
-        lowercase: true,
+        lowercase: true
     },
     password: {
         type: String,
@@ -41,7 +41,7 @@ const userSchema = new Schema({
     },
     image: {
         type: String,
-        default: '',
+        default: ''
     },
     links: {
         type: String,
@@ -49,4 +49,5 @@ const userSchema = new Schema({
     }
 })
 
-export const User = mongoose.model<IUser>('User', userSchema)
+const User = mongoose.model<IUser>('User', userSchema)
+export default User

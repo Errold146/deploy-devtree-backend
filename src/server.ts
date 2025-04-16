@@ -1,22 +1,20 @@
-import express from 'express'
+import express from 'express' 
 import cors from 'cors'
 import 'dotenv/config'
-import router from './router.ts'
-import { connectDB, corsConfig } from './config/index.ts'
+import router from './router'
+import { connectDB } from './config/db'
+import { corsConfig } from './config/cors'
 
-// Create app
+connectDB()
+
 const app = express()
 
 // Cors
-app.use( cors(corsConfig))
+app.use(cors(corsConfig))
 
-// Connect to db
-connectDB()
+// Leer datos de formularios
+app.use(express.json())
 
-// Read form data
-app.use( express.json() )
-
-// Create routes
 app.use('/', router)
 
 export default app

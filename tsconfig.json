@@ -1,25 +1,15 @@
 {
     "compilerOptions": {
-        "outDir": "./dist",
+        "outDir": "./dist", 
         "rootDir": "./src",
-        "lib": [
-            "ESNext"
-        ],
-        "target": "ESNext",
-        "moduleResolution": "node",
-        "module": "CommonJS",
-        "strict": false,
+        "lib": ["ESNext"],
+        "target": "ESNext", 
+        "moduleResolution": "NodeNext",
+        "module": "NodeNext",
+        "strict": false, 
         "sourceMap": true,
         "esModuleInterop": true,
-        "skipLibCheck": true,
-        "resolveJsonModule": true,
         "declaration": true,
-        "allowSyntheticDefaultImports": true,
-        "allowImportingTsExtensions": true,
-        "emitDeclarationOnly": true,
-        "preserveSymlinks": true
-    },
-    "include": [
-        "src/**/*.ts"
-    ]
+    }, 
+    "include": ["src/**/*.ts"]
 }
