@@ -26,6 +26,9 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
     }
 
     try {
+        if (!process.env.JWT_SECRET) {
+            throw new Error('JWT_SECRET is not defined in the environment variables')
+        }
         const result = jwt.verify(token, process.env.JWT_SECRET)
         if(typeof result === 'object' && result.id) {
             const user = await User.findById(result.id).select('-password')

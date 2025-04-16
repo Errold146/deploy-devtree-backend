@@ -8,19 +8,19 @@ import { checkPassword, hashPassword } from '../utils/auth'
 import { generateJWT } from '../utils/jwt'
 import cloudinary from '../config/cloudinary'
 
-export const createAccount = async (req: Request, res: Response) => {
+export const createAccount = async (req: Request, res: Response): Promise<void> => {
     const { email, password } = req.body
     const userExists = await User.findOne({ email })
     if (userExists) {
-        const error = new Error('Un usuario con ese mail ya esta registrado')
-        return res.status(409).json({ error: error.message })
+        res.status(409).json({ error: 'El usuario ya existe' })
+        return
     }
 
     const handle = slug(req.body.handle, '')
     const handleExists = await User.findOne({ handle })
     if (handleExists) {
-        const error = new Error('Nombre de usuario no disponible')
-        return res.status(409).json({ error: error.message })
+        res.status(409).json({ error: 'Nombre de Usuario no disponible' })
+        return
     }
 
     const user = new User(req.body)
@@ -44,15 +44,15 @@ export const login = async (req: Request, res: Response) => {
     // Revisar si el usuario esta registrado
     const user = await User.findOne({ email })
     if (!user) {
-        const error = new Error('El Usuario no existe')
-        return res.status(404).json({ error: error.message })
+        res.status(404).json({ error: 'El Usuario no existe' })
+        return
     }
 
     // Comprobar el password
     const isPasswordCorrect = await checkPassword(password, user.password)
     if (!isPasswordCorrect) {
-        const error = new Error('Password Incorrecto')
-        return res.status(401).json({ error: error.message })
+        res.status(401).json({ error: 'Password Incorrecto' })
+        return
     }
 
     const token = generateJWT({ id: user._id })
@@ -60,7 +60,7 @@ export const login = async (req: Request, res: Response) => {
     res.send(token)
 }
 
-export const getUser = async (req: Request, res: Response) => {
+export const getUser = async (req: Request, res: Response): Promise<void> => {
     res.json(req.user)
 }
 
@@ -70,58 +70,69 @@ export const updateProfile = async (req: Request, res: Response) => {
 
         const handle = slug(req.body.handle, '')
         const handleExists = await User.findOne({ handle })
-        if (handleExists && handleExists.email !== req.user.email) {
-            const error = new Error('Nombre de usuario no disponible')
-            return res.status(409).json({ error: error.message })
+        if (handleExists && req.user && handleExists.email !== req.user.email) {
+            res.status(409).json({ error: 'Nombre de usuario no disponible' })
+            return
         }
 
         // Actualizar el usuario
-        req.user.description = description
-        req.user.handle = handle
-        req.user.links = links
-        await req.user.save()
+        if (!req.user) {
+            res.status(400).json({ error: 'Usuario no autenticado' });
+            return
+        }
+        req.user.description = description;
+        req.user.handle = handle;
+        req.user.links = links;
+        await req.user.save();
         res.send('Perfil Actualizado Correctamente')
 
     } catch (e) {
-        const error = new Error('Hubo un error')
-        return res.status(500).json({ error: error.message })
+        res.status(500).json({ error: 'Hubo un error' })
+        return
     }
 }
 
-export const uploadImage = async (req: Request, res: Response) => {
-    const form = formidable({ multiples: false })
-    try {
-        form.parse(req, (error, fields, files) => {
-            cloudinary.uploader.upload(files.file[0].filepath, { public_id: uuid() }, async function (error, result) {
-                if (error) {
-                    const error = new Error('Hubo un error al subir la imagen')
-                    return res.status(500).json({ error: error.message })
-                }
-                if (result) {
-                    req.user.image = result.secure_url
-                    await req.user.save()
-                    res.json({ image: result.secure_url })
-                }
-            })
-        })
-    } catch (e) {
-        const error = new Error('Hubo un error')
-        return res.status(500).json({ error: error.message })
-    }
-}
+export const uploadImage = async (req: Request, res: Response): Promise<void> => {
+    const form = formidable({ multiples: false });
+
+    form.parse(req, async (error, fields, files) => {
+        if (error) {
+            res.status(500).json({ error: 'Hubo un error al subir la imagen' });
+            return;
+        }
+
+        try {
+            if (!files.file || !Array.isArray(files.file) || files.file.length === 0) {
+                res.status(400).json({ error: 'No se encontró ningún archivo para subir' });
+                return;
+            }
+            const result = await cloudinary.uploader.upload(files.file[0].filepath, { public_id: uuid() });
+            if (req.user) {
+                req.user.image = result.secure_url;
+                await req.user.save();
+            } else {
+                res.status(400).json({ error: 'Usuario no autenticado' });
+                return;
+            }
+            res.json({ image: result.secure_url });
+        } catch (uploadError) {
+            res.status(500).json({ error: 'Error al procesar la imagen' });
+        }
+    });
+};
 
 export const getUserByHandle = async (req: Request, res: Response) => {
     try {
         const { handle } = req.params
         const user = await User.findOne({ handle }).select('-_id -__v -email -password')
         if (!user) {
-            const error = new Error('El Usuario no existe')
-            return res.status(404).json({ error: error.message })
+            res.status(404).json({ error: 'El Usuario no existe' })
+            return
         }
         res.json(user)
     } catch (e) {
-        const error = new Error('Hubo un error')
-        return res.status(500).json({ error: error.message })
+        res.status(500).json({ error: 'Hubo un error' })
+        return
     }
 }
 
@@ -130,12 +141,12 @@ export const searchByHandle = async (req: Request, res: Response) => {
         const { handle } = req.body
         const userExists = await User.findOne({handle})
         if(userExists) {
-            const error = new Error(`${handle} ya está registrado`)
-            return res.status(409).json({error: error.message})
+            res.status(409).json({ error: `${handle} ya está registrado` })
+            return
         }
         res.send(`${handle} está disponible`)
     } catch (e) {
-        const error = new Error('Hubo un error')
-        return res.status(500).json({ error: error.message })
+        res.status(500).json({ error: 'Hubo un error' })
+        return
     }
 }
