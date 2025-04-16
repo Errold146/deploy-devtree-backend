@@ -1,0 +1,39 @@
+{
+  "name": "devtree",
+  "version": "1.0.0",
+  "description": "Proyecto con express y TypeScript",
+  "license": "ISC",
+  "author": "Errold Núñez Sánchez",
+  "main": "index.ts",
+  "scripts": {
+    "dev": "nodemon src/index.ts",
+    "dev:api": "nodemon src/index.ts --api",
+    "build": "tsc",
+    "start": "node dist/index.ts"
+  },
+  "dependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/formidable": "^3.4.5",
+    "bcrypt": "^5.1.1",
+    "cloudinary": "^2.6.0",
+    "colors": "^1.4.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^5.1.0",
+    "express-validator": "^7.2.1",
+    "formidable": "^3.5.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.13.1",
+    "slug": "^10.0.0",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.1",
+    "@types/jsonwebtoken": "^9.0.9",
+    "@types/slug": "^5.0.9",
+    "nodemon": "^3.1.9",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.2"
+  }
+}
