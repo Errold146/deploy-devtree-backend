@@ -3,18 +3,18 @@ interface CorsConfig {
 }
 
 export const corsConfig: CorsConfig = {
-    origin: function(origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void): void {
-        console.log("Origin recibido:", origin);
-        const whiteList: (string | undefined)[] = [
+    origin: function (origin, callback) {
+        const whiteList = [
             process.env.FRONTEND_URL,
             'https://aesthetic-heliotrope-cde61c.netlify.app'
-        ]
+        ];
 
-        if (whiteList.includes(origin)) {
-            callback(null, true);
+        // Permitir solicitudes sin origen (undefined) de forma controlada
+        if (!origin || whiteList.includes(origin)) {
+            callback(null, true); // Permite la solicitud
         } else {
             console.error("CORS bloqueado para origin:", origin);
-            callback(new Error('Error de CORS'));
+            callback(new Error('Error de CORS')); // Bloquea la solicitud
         }
     }
 };
