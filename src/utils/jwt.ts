@@ -10,7 +10,7 @@ export const generateJWT = (payload: JwtPayloadData): string => {
         throw new Error('JWT_SECRET is not defined in environment variables');
     }
     const token = jwt.sign(payload, process.env.JWT_SECRET, {
-        expiresIn: '180d'
+        expiresIn: '1d'
     });
     return token;
 };
